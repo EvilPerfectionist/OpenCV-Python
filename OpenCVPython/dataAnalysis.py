@@ -75,7 +75,7 @@ for fi in files[:]:
     
     
 # Plotting the histogram
-nbins = 10
+nbins = 11
 plt.figure(figsize=[20,10])
 plt.subplot(2,3,1)
 plt.hist2d(B, G, bins=nbins, norm=LogNorm())
