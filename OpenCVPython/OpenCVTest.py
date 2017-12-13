@@ -25,29 +25,29 @@ import cvutils
 
 # Get the path of the training set
 #parser = ap.ArgumentParser()
-#parser.add_argument("-t", "--trainingSet", help="Path to Training Set", required="True")
+#parser.add_argument("-t", "--testingSet", help="Path to Testing Set", required="True")
 #parser.add_argument("-l", "--imageLabels", help="Path to Image Label Files", required="True")
 #args = vars(parser.parse_args())
 
-# Store the path of training images in train_images
-train_images = cvutils.imlist("data/lbp/train/")
+# Load the List for storing the LBP Histograms, address of images and the corresponding label
+X_name, X_test, y_test = joblib.load("lbp.pkl")
+
+# Store the path of testing images in test_images
+test_images = cvutils.imlist("data/lbp/test/")
 # Dictionary containing image paths as keys and corresponding label as value
-train_dic = {}
-with open('data/lbp/class_train.txt', 'rt') as csvfile:
+test_dic = {}
+with open('data/lbp/class_test.txt', 'rt') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ')
     for row in reader:
-        train_dic[row[0]] = int(row[1])
+        test_dic[row[0]] = int(row[1])
 
-# List for storing the LBP Histograms, address of images and the corresponding label
-X_test = []
-X_name = []
-y_test = []
+# Dict containing scores
+results_all = {}
 
-# For each image in the training set calculate the LBP histogram
-# and update X_test, X_name and y_test
-for train_image in train_images:
+for test_image in test_images:
+    print ("\nCalculating Normalized LBP Histogram for {}".format(test_image))
     # Read the image
-    im = cv2.imread(train_image)
+    im = cv2.imread(test_image)
     # Convert to grayscale as LBP works on grayscale image
     im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     radius = 3
@@ -58,30 +58,37 @@ for train_image in train_images:
     # Calculate the histogram
     x = itemfreq(lbp.ravel())
     # Normalize the histogram
-    hist = x[:, 1] / sum(x[:, 1])
-    # Append image path in X_name
-    X_name.append(train_image)
-    # Append histogram to X_name
-    X_test.append(hist)
-    # Append class label in y_test
-    y_test.append(train_dic[os.path.split(train_image)[1]])
+    hist = x[:, 1]/sum(x[:, 1])
+    # Display the query image
+    results = []
+    # For each image in the training dataset
+    # Calculate the chi-squared distance and the sort the values
+    for index, x in enumerate(X_test):
+        score = cv2.compareHist(np.array(x, dtype=np.float32), np.array(hist, dtype=np.float32), cv2.HISTCMP_CHISQR)
+        results.append((X_name[index], round(score, 3)))
+    results = sorted(results, key=lambda score: score[1])
+    results_all[test_image] = results
+    print ("Displaying scores for {} ** \n".format(test_image))
+    for image, score in results:
+        print ("{} has score {}".format(image, score))
 
-# Dump the  data
-joblib.dump((X_name, X_test, y_test), "lbp.pkl", compress=3)
-
-# Display the training images
-nrows = 2
-ncols = 3
-fig, axes = plt.subplots(nrows, ncols)
-for row in range(nrows):
-    for col in range(ncols):
-        axes[row][col].imshow(cv2.imread(X_name[row * ncols + col]))
-        axes[row][col].axis('off')
-        axes[row][col].set_title("{}".format(os.path.split(X_name[row * ncols + col])[1]))
-
-# Convert to numpy and display the image
-fig.canvas.draw()
-im_ts = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-im_ts = im_ts.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-cv2.imshow("Training Set", im_ts)
-cv2.waitKey()
+for test_image, results in results_all.items():
+    # Read the image
+    im = cv2.imread(test_image)
+    # Display the results
+    nrows = 2
+    ncols = 3
+    fig, axes = plt.subplots(nrows,ncols)
+    fig.suptitle("** Scores for -> {}**".format(test_image))
+    for row in range(nrows):
+        for col in range(ncols):
+            axes[row][col].imshow(cv2.imread(results[row*ncols+col][0]))
+            axes[row][col].axis('off')
+            axes[row][col].set_title("Score {}".format(results[row*ncols+col][1]))
+    fig.canvas.draw()
+    im_ts = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+    im_ts = im_ts.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    cv2.imshow("** Query Image -> {}**".format(test_image), im)
+    cv2.imshow("** Scores for -> {}**".format(test_image), im_ts)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
