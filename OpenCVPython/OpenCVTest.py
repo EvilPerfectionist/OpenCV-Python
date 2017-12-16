@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # OpenCV bindings
 import cv2
-# To performing path manipulations 
+# To performing path manipulations
 import os
 # Local Binary Pattern function
 from skimage.feature import local_binary_pattern
-# To calculate a normalized histogram 
+# To calculate a normalized histogram
 from scipy.stats import itemfreq
 from sklearn.preprocessing import normalize
 # To read class from file
@@ -31,7 +31,9 @@ import cvutils
 
 # Load the List for storing the LBP Histograms, address of images and the corresponding label
 X_name, X_test, y_test = joblib.load("lbp.pkl")
-
+#print(X_name)
+#print(X_test)
+#print(y_test)
 # Store the path of testing images in test_images
 test_images = cvutils.imlist("data/lbp/test/")
 # Dictionary containing image paths as keys and corresponding label as value
@@ -55,6 +57,8 @@ for test_image in test_images:
     no_points = 8 * radius
     # Uniform LBP is used
     lbp = local_binary_pattern(im_gray, no_points, radius, method='uniform')
+    print(lbp)
+    print(lbp.ravel())
     # Calculate the histogram
     x = itemfreq(lbp.ravel())
     # Normalize the histogram
