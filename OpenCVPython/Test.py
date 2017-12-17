@@ -1,24 +1,35 @@
 import numpy as np
-import cv2
 
-img = cv2.imread('4.jpg')
-Z = img.reshape((-1,3))
+z = np.array([[1, 2], [3, 4], [5, 6]])
+print(z)
+print(z[0])
+print(z[[0]])
+print(z[[[0]]])
+print(z[[[[0]]]])
+print(z[[[[[0]]]]])
 
-# convert to np.float32
-Z = np.float32(Z)
+x = np.arange(3)
+print(x)
+print(x[0])
+print(x[[0]])
+print(x[[[0]]])
+print(x[[[[0]]]])
+print(x[[[[[0]]]]])
+print(x[[True, True, False]])
 
-# define criteria, number of clusters(K) and apply kmeans()
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-K = 2
-ret,label,center=cv2.kmeans(Z,K,None,criteria,10,cv2.KMEANS_RANDOM_CENTERS)
-print(center)
+label =  np.array([0, 0, 1])
+labels =  np.array([[0], [0], [1]])
+a = z[label==0]
+b = z[labels.ravel()==0]
+x = x.reshape((3, 1))
+c = x[label==0]
+d = x[labels==0]
+print([0]==[0])
 print(label)
-# Now convert back into uint8, and make original image
-center = np.uint8(center)
-res = center[label.flatten()]
-print(res)
-res2 = res.reshape((img.shape))
-
-cv2.imshow('res2',res2)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+print(labels)
+print(a)
+print(b)
+print(c)
+print(d)
+print(label==0)
+print(labels==0)
