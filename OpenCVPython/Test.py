@@ -1,35 +1,13 @@
 import numpy as np
 
-z = np.array([[1, 2], [3, 4], [5, 6]])
+x = np.array([[[0], [1], [2]]])
+y = np.squeeze(x)
+z = np.squeeze(x, axis=0)
+a = np.squeeze(x, axis=2)
+print(x.shape)
+print(y)
+print(y.shape)
 print(z)
-print(z[0])
-print(z[[0]])
-print(z[[[0]]])
-print(z[[[[0]]]])
-print(z[[[[[0]]]]])
-
-x = np.arange(3)
-print(x)
-print(x[0])
-print(x[[0]])
-print(x[[[0]]])
-print(x[[[[0]]]])
-print(x[[[[[0]]]]])
-print(x[[True, True, False]])
-
-label =  np.array([0, 0, 1])
-labels =  np.array([[0], [0], [1]])
-a = z[label==0]
-b = z[labels.ravel()==0]
-x = x.reshape((3, 1))
-c = x[label==0]
-d = x[labels==0]
-print([0]==[0])
-print(label)
-print(labels)
+print(z.shape)
 print(a)
-print(b)
-print(c)
-print(d)
-print(label==0)
-print(labels==0)
+print(a.shape)
